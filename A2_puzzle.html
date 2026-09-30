@@ -774,15 +774,16 @@
     let puzzleHeight = 0;
 
     /* -------------------------------------------------------------------------
-     * 2. Web Audio API 3중 소음 합성 엔진 (오프라인 100% 자체 생성)
+     * 2. Web Audio API 실감형 교실 웅성거림 & 의자 끄는 소리 합성 엔진
      * ------------------------------------------------------------------------- */
     let audioCtx = null;
     let masterGain = null;
-    let ambientGain = null;
+    let babbleGain = null;
     let isAudioInitialized = false;
 
     let tickTimer = null;
-    let distTimer = null;
+    let chairTimer = null;
+    let babbleInterval = null;
 
     function initAudio() {
       if (isAudioInitialized && audioCtx) return;
@@ -791,17 +792,17 @@
         audioCtx = new AudioContext();
 
         masterGain = audioCtx.createGain();
-        masterGain.gain.setValueAtTime(isNoiseOn ? 0.65 : 0.0, audioCtx.currentTime);
+        masterGain.gain.setValueAtTime(isNoiseOn ? 0.75 : 0.0, audioCtx.currentTime);
         masterGain.connect(audioCtx.destination);
 
-        // ① 앰비언스 (교실 웅성거림 핑크 노이즈 버퍼 + 필터)
-        createAmbientNoise();
+        // ① 실감나는 다중 인물 교실 웅성거림 (Multi-Voice Babble / Chatter)
+        startClassroomBabble();
 
-        // ② 주기적 시계 초침 소리 시작 (1초마다 틱-톡)
+        // ② 시계 초침 소리 (1초마다 틱-톡)
         startClockTicks();
 
-        // ③ 불규칙 돌발 환경음 (3~7초마다 무작위)
-        startSuddenDisturbances();
+        // ③ 바닥 의자 끄는 소리 (끼이익~) & 돌발 교실 소음
+        startChairAndDisturbances();
 
         isAudioInitialized = true;
       } catch (e) {
@@ -809,13 +810,18 @@
       }
     }
 
-    // 핑크 노이즈 앰비언스 생성
-    function createAmbientNoise() {
+    // ① 실감나는 교실 웅성거림 (다중 음성 포먼트 + 속삭임 믹싱)
+    function startClassroomBabble() {
       if (!audioCtx) return;
-      const bufferSize = audioCtx.sampleRate * 3; // 3초 루프
+
+      babbleGain = audioCtx.createGain();
+      babbleGain.gain.setValueAtTime(0.55, audioCtx.currentTime);
+      babbleGain.connect(masterGain);
+
+      // 배경 핑크 노이즈 (속삭임과 교실 공기감)
+      const bufferSize = audioCtx.sampleRate * 3;
       const noiseBuffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
       const output = noiseBuffer.getChannelData(0);
-
       let b0 = 0, b1 = 0, b2 = 0, b3 = 0, b4 = 0, b5 = 0, b6 = 0;
       for (let i = 0; i < bufferSize; i++) {
         const white = Math.random() * 2 - 1;
@@ -825,36 +831,237 @@
         b3 = 0.86650 * b3 + white * 0.3104856;
         b4 = 0.55000 * b4 + white * 0.5329522;
         b5 = -0.7616 * b5 - white * 0.0168980;
-        output[i] = (b0 + b1 + b2 + b3 + b4 + b5 + b6 + white * 0.5362) * 0.11;
+        output[i] = (b0 + b1 + b2 + b3 + b4 + b5 + b6 + white * 0.5362) * 0.14;
         b6 = white * 0.115926;
       }
+      const whisperNoise = audioCtx.createBufferSource();
+      whisperNoise.buffer = noiseBuffer;
+      whisperNoise.loop = true;
 
-      const whiteNoise = audioCtx.createBufferSource();
-      whiteNoise.buffer = noiseBuffer;
-      whiteNoise.loop = true;
+      const whisperFilter = audioCtx.createBiquadFilter();
+      whisperFilter.type = 'bandpass';
+      whisperFilter.frequency.setValueAtTime(1100, audioCtx.currentTime);
+      whisperFilter.Q.setValueAtTime(1.8, audioCtx.currentTime);
 
-      // 사람 말소리 대역 필터 (대역통과 300Hz ~ 2500Hz)
-      const filter = audioCtx.createBiquadFilter();
-      filter.type = 'bandpass';
-      filter.frequency.setValueAtTime(800, audioCtx.currentTime);
-      filter.Q.setValueAtTime(1.2, audioCtx.currentTime);
+      whisperNoise.connect(whisperFilter);
+      whisperFilter.connect(babbleGain);
+      whisperNoise.start();
 
-      // 필터 주파수를 부드럽게 흔들어 웅성거림 느낌 부여
-      const lfo = audioCtx.createOscillator();
-      const lfoGain = audioCtx.createGain();
-      lfo.frequency.value = 0.6; // 0.6Hz 주기
-      lfoGain.gain.value = 350;
-      lfo.connect(lfoGain);
-      lfoGain.connect(filter.frequency);
-      lfo.start();
+      // 4명의 가상 친구들이 교실에서 동시에 중얼거리는 목소리 포먼트 생성
+      const voicePitches = [135, 175, 210, 260]; // 남자아이/여자아이 다양한 음높이
+      voicePitches.forEach((pitch, idx) => {
+        const osc = audioCtx.createOscillator();
+        const vGain = audioCtx.createGain();
+        const formantFilter = audioCtx.createBiquadFilter();
 
-      ambientGain = audioCtx.createGain();
-      ambientGain.gain.setValueAtTime(0.4, audioCtx.currentTime);
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(pitch, audioCtx.currentTime);
 
-      whiteNoise.connect(filter);
-      filter.connect(ambientGain);
-      ambientGain.connect(masterGain);
-      whiteNoise.start();
+        // 포먼트 대역 (모음 발음 주파수 대역)
+        formantFilter.type = 'bandpass';
+        formantFilter.frequency.setValueAtTime(500 + idx * 250, audioCtx.currentTime);
+        formantFilter.Q.setValueAtTime(4.0, audioCtx.currentTime);
+
+        vGain.gain.setValueAtTime(0.08, audioCtx.currentTime);
+
+        // 무작위로 말하는 듯한 음절(Syllable) 리듬 변조
+        const lfoRate = 2.5 + Math.random() * 2.5; // 초당 2~5개 음절
+        const lfo = audioCtx.createOscillator();
+        const lfoGain = audioCtx.createGain();
+        lfo.frequency.value = lfoRate;
+        lfoGain.gain.value = 0.07;
+        lfo.connect(lfoGain);
+        lfoGain.connect(vGain.gain);
+        lfo.start();
+
+        // 모음 필터 주파수 변조 (아, 에, 오, 우 모음 변화 시뮬레이션)
+        const filterLfo = audioCtx.createOscillator();
+        const filterLfoGain = audioCtx.createGain();
+        filterLfo.frequency.value = 1.2 + idx * 0.4;
+        filterLfoGain.gain.value = 350;
+        filterLfo.connect(filterLfoGain);
+        filterLfoGain.connect(formantFilter.frequency);
+        filterLfo.start();
+
+        osc.connect(formantFilter);
+        formantFilter.connect(vGain);
+        vGain.connect(babbleGain);
+        osc.start();
+      });
+
+      // 주기적으로 웅성거리는 말소리 덩어리(Burst) 추가
+      if (babbleInterval) clearInterval(babbleInterval);
+      babbleInterval = setInterval(() => {
+        if (!isNoiseOn || !audioCtx || audioCtx.state !== 'running') return;
+        playChatterSyllables();
+      }, 700);
+    }
+
+    // 짧은 말소리 옹알이 팝 (웅성웅성)
+    function playChatterSyllables() {
+      if (!audioCtx || !isNoiseOn) return;
+      try {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        const filter = audioCtx.createBiquadFilter();
+
+        const f0 = 150 + Math.random() * 200;
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(f0, audioCtx.currentTime);
+        osc.frequency.linearRampToValueAtTime(f0 + (Math.random() - 0.5) * 80, audioCtx.currentTime + 0.25);
+
+        filter.type = 'bandpass';
+        filter.frequency.setValueAtTime(600 + Math.random() * 1200, audioCtx.currentTime);
+        filter.Q.setValueAtTime(5.0, audioCtx.currentTime);
+
+        gain.gain.setValueAtTime(0.001, audioCtx.currentTime);
+        gain.gain.linearRampToValueAtTime(0.12, audioCtx.currentTime + 0.08);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.3);
+
+        osc.connect(filter);
+        filter.connect(gain);
+        gain.connect(babbleGain);
+
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.32);
+      } catch (e) {}
+    }
+
+    // ② 의자 바닥 끄는 소리 (끼이이익~ 끽!)
+    function playChairScreech() {
+      if (!audioCtx || !isNoiseOn) return;
+      try {
+        const duration = 0.4 + Math.random() * 0.5; // 0.4~0.9초
+        const osc = audioCtx.createOscillator();
+        const osc2 = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        const filter = audioCtx.createBiquadFilter();
+
+        // 쇳소리/마찰음 날카로운 주파수
+        osc.type = 'sawtooth';
+        const baseFreq = 1600 + Math.random() * 800;
+        osc.frequency.setValueAtTime(baseFreq, audioCtx.currentTime);
+        osc.frequency.linearRampToValueAtTime(baseFreq - 300, audioCtx.currentTime + duration);
+
+        osc2.type = 'sawtooth';
+        osc2.frequency.setValueAtTime(baseFreq * 1.33, audioCtx.currentTime);
+        osc2.frequency.linearRampToValueAtTime(baseFreq * 1.1, audioCtx.currentTime + duration);
+
+        // 마찰 진동 모듈레이션
+        const mod = audioCtx.createOscillator();
+        const modGain = audioCtx.createGain();
+        mod.frequency.value = 45; // 45Hz 거친 떨림
+        modGain.gain.value = 400;
+        mod.connect(modGain);
+        modGain.connect(osc.frequency);
+        mod.start();
+        mod.stop(audioCtx.currentTime + duration);
+
+        filter.type = 'highpass';
+        filter.frequency.setValueAtTime(1000, audioCtx.currentTime);
+
+        gain.gain.setValueAtTime(0.01, audioCtx.currentTime);
+        gain.gain.linearRampToValueAtTime(0.35, audioCtx.currentTime + 0.05); // 의자 소리 강조
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+
+        osc.connect(filter);
+        osc2.connect(filter);
+        filter.connect(gain);
+        gain.connect(masterGain);
+
+        osc.start();
+        osc2.start();
+        osc.stop(audioCtx.currentTime + duration + 0.02);
+        osc2.stop(audioCtx.currentTime + duration + 0.02);
+      } catch (e) {}
+    }
+
+    // 시계 초침 사운드 (틱-톡)
+    function playTickSound(isTock) {
+      if (!audioCtx || !isNoiseOn) return;
+      try {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(isTock ? 850 : 1300, audioCtx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(100, audioCtx.currentTime + 0.04);
+
+        gain.gain.setValueAtTime(0.38, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.04);
+
+        osc.connect(gain);
+        gain.connect(masterGain);
+
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.05);
+      } catch (e) {}
+    }
+
+    let isTockState = false;
+    function startClockTicks() {
+      if (tickTimer) clearInterval(tickTimer);
+      tickTimer = setInterval(() => {
+        if (isNoiseOn && audioCtx && audioCtx.state === 'running') {
+          playTickSound(isTockState);
+          isTockState = !isTockState;
+        }
+      }, 950);
+    }
+
+    // 의자 끄는 소리 및 교실 돌발 잡음 루프 (3~6초마다)
+    function startChairAndDisturbances() {
+      if (chairTimer) clearInterval(chairTimer);
+      chairTimer = setInterval(() => {
+        if (!isNoiseOn || !audioCtx || audioCtx.state !== 'running') return;
+        
+        const rand = Math.random();
+        if (rand < 0.55) {
+          // 의자 끄는 소리
+          playChairScreech();
+        } else if (rand < 0.8) {
+          // 연필/책상 톡톡 소리
+          playDeskTap();
+        } else {
+          // 책장 넘기는 소리
+          playPageFlip();
+        }
+      }, 3800);
+    }
+
+    // 책상 톡톡 소리
+    function playDeskTap() {
+      if (!audioCtx || !isNoiseOn) return;
+      try {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(320, audioCtx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(50, audioCtx.currentTime + 0.06);
+        gain.gain.setValueAtTime(0.35, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.06);
+        osc.connect(gain);
+        gain.connect(masterGain);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.07);
+      } catch (e) {}
+    }
+
+    // 책장 넘기는 파라락 소리
+    function playPageFlip() {
+      if (!audioCtx || !isNoiseOn) return;
+      try {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(800, audioCtx.currentTime);
+        gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.15);
+        osc.connect(gain);
+        gain.connect(masterGain);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.16);
+      } catch (e) {}
     }
 
     // 시계 초침 사운드 (틱-톡)
