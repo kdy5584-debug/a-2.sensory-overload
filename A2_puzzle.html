@@ -28,7 +28,7 @@
     }
 
     body {
-      font-family: "Pretendard", -apple-system, BlinkMacSystemFont, "Malgun Gothic", sans-serif;
+      font-family: "Pretendard", -apple-system, BlinkMacSystemFont, "Malgun Gothic", "맑은 고딕", sans-serif;
       background-color: var(--bg);
       color: var(--text);
       min-height: 100vh;
@@ -87,7 +87,6 @@
       flex-wrap: wrap;
     }
 
-    /* 버튼 스타일 공통 */
     button {
       font-family: inherit;
       cursor: pointer;
@@ -105,7 +104,6 @@
       transform: scale(0.96);
     }
 
-    /* 소음 제어 버튼 (핵심) */
     .noise-btn {
       background-color: var(--danger);
       color: white;
@@ -144,7 +142,7 @@
       background-color: var(--primary-hover);
     }
 
-    /* 상단 컨트롤 바 (난이도 및 테마 선택) */
+    /* 툴바 */
     .toolbar {
       background-color: rgba(30, 41, 59, 0.7);
       backdrop-filter: blur(8px);
@@ -217,7 +215,6 @@
       gap: 12px;
     }
 
-    /* 퍼즐 판 (왼쪽/상단 영역) */
     .board-container {
       flex: 1.1;
       background-color: var(--card-bg);
@@ -238,7 +235,6 @@
       box-shadow: 0 4px 20px rgba(0,0,0,0.5);
     }
 
-    /* 퍼즐 조각 보관함 (오른쪽/하단 영역) */
     .pieces-container {
       flex: 1;
       background-color: var(--card-bg);
@@ -275,7 +271,6 @@
       touch-action: none;
     }
 
-    /* 감각 과부하 시각적 자극 효과 (깜빡임/왜곡 오버레이) */
     .overload-visual-fx {
       position: absolute;
       top: 0; left: 0; right: 0; bottom: 0;
@@ -294,7 +289,6 @@
       75% { border-color: rgba(239, 68, 68, 0.6); }
     }
 
-    /* 안내 메시지 띠 */
     .noise-indicator-bar {
       background: linear-gradient(90deg, #991b1b, #b45309, #991b1b);
       color: #fef08a;
@@ -398,7 +392,6 @@
       color: #38bdf8;
     }
 
-    /* 반응형 레이아웃 (세로 모드/스마트폰 대응) */
     @media (max-width: 768px) {
       main {
         flex-direction: column;
@@ -418,6 +411,9 @@
 </head>
 <body>
 
+  <!-- 실제 교실 웅성거림 MP3 오디오 -->
+  <audio id="bgAudio" src="freesound_community-classroom-background-54177.mp3" loop preload="auto"></audio>
+
   <!-- 1. 헤더 영역 -->
   <header>
     <div class="header-title-group">
@@ -428,7 +424,6 @@
       </div>
     </div>
     <div class="header-controls">
-      <!-- 소음 ON/OFF 버튼 -->
       <button id="noiseToggleBtn" class="noise-btn" onclick="toggleNoise()">
         <span id="noiseIcon">🔊</span> <span id="noiseText">감각과부하 소음 [ON]</span>
       </button>
@@ -444,34 +439,24 @@
     </div>
   </header>
 
-  <!-- 2. 감각 과부하 상태 표시 띠 -->
+  <!-- 2. 상태 표시 띠 -->
   <div id="noiseIndicator" class="noise-indicator-bar">
-    <span>⚠️ <strong>[감각 과부하 소음 재생 중]</strong> 시계 초침 + 교실 웅성거림 + 불규칙 소음이 집중력을 방해하고 있습니다.</span>
+    <span>⚠️ <strong>[감각 과부하 소음 재생 중]</strong> 실제 교실 웅성거림 + 시계 초침 소리가 집중력을 방해하고 있습니다.</span>
     <span>볼륨: 적정 안전 수준(65dB) 고정</span>
   </div>
 
-  <!-- 3. 상단 툴바 (난이도 선택 및 테마 선택) -->
+  <!-- 3. 상단 툴바 -->
   <div class="toolbar">
-    <!-- 학년군별 추천 난이도 탭 -->
     <div style="display:flex; align-items:center; gap:8px;">
       <span style="font-size:11.5px; font-weight:700; color:var(--text-muted);">학년 선택:</span>
       <div class="tab-group">
-        <button class="tab-btn" onclick="setDifficulty(2, this)" title="맛보기/도움용">
-          맛보기 (4조각)
-        </button>
-        <button class="tab-btn active grade-low" onclick="setDifficulty(3, this)" title="1~3학년 추천">
-          🌱 1~3학년 추천 (9조각)
-        </button>
-        <button class="tab-btn grade-high" onclick="setDifficulty(4, this)" title="4~6학년 추천">
-          ⭐ 4~6학년 추천 (16조각)
-        </button>
-        <button class="tab-btn" onclick="setDifficulty(5, this)" title="심화 도전">
-          🔥 마스터 챌린지 (25조각)
-        </button>
+        <button class="tab-btn" onclick="setDifficulty(2, this)">맛보기 (4조각)</button>
+        <button class="tab-btn active grade-low" onclick="setDifficulty(3, this)">🌱 1~3학년 추천 (9조각)</button>
+        <button class="tab-btn grade-high" onclick="setDifficulty(4, this)">⭐ 4~6학년 추천 (16조각)</button>
+        <button class="tab-btn" onclick="setDifficulty(5, this)">🔥 마스터 챌린지 (25조각)</button>
       </div>
     </div>
 
-    <!-- 퍼즐 테마 일러스트 선택 -->
     <div style="display:flex; align-items:center; gap:8px;">
       <span style="font-size:11.5px; font-weight:700; color:var(--text-muted);">그림 테마:</span>
       <div class="tab-group">
@@ -481,7 +466,6 @@
       </div>
     </div>
 
-    <!-- 진행 상황 표시 (타이머 & 맞춘 조각) -->
     <div class="status-panel">
       <div class="stat-item">
         ⏱️ 소요 시간: <strong id="timerDisplay">00:00</strong>
@@ -496,12 +480,10 @@
   <main>
     <div class="overload-visual-fx active" id="visualFx"></div>
 
-    <!-- 왼쪽: 퍼즐 완성 판 -->
     <div class="board-container" id="boardContainer">
       <canvas id="boardCanvas"></canvas>
     </div>
 
-    <!-- 오른쪽: 흩어진 퍼즐 조각 보관 트레이 -->
     <div class="pieces-container" id="trayContainer">
       <div class="pieces-header">
         <span class="pieces-title">
@@ -513,7 +495,7 @@
     </div>
   </main>
 
-  <!-- 5. 퍼즐 완성 & 공감 배움 완료 모달 -->
+  <!-- 5. 퍼즐 완성 모달 -->
   <div class="modal-overlay" id="finishModal">
     <div class="modal-card">
       <span class="modal-badge">🎉 퍼즐 완성 & 미션 완주!</span>
@@ -538,7 +520,7 @@
       <div class="modal-reflection">
         <p style="margin-bottom:6px;"><strong>💭 왜 이렇게 퍼즐 맞추기가 힘들었을까요?</strong></p>
         <p style="margin-bottom:8px;">
-          시끄러운 시계 소리, 웅성거림, 돌발 소음이 계속 머릿속에 들어와 쉬운 그림 조각도 어디에 둘지 바로 생각나지 않았죠?
+          쉬는 시간 교실 웅성거림과 시계 초침 소리가 계속 머릿속에 들어와 쉬운 그림 조각도 어디에 둘지 바로 생각나지 않았죠?
         </p>
         <p>
           <strong>🏫 교실 속 우리의 작은 실천:</strong><br>
@@ -556,199 +538,12 @@
     </div>
   </div>
 
-  <!-- SVG 테마 그래픽 소스 (Canvas 렌더링용 인라인 벡터 이미지) -->
-  <svg style="display: none;">
-    <!-- 테마 0: 안내견과 어린이 -->
-    <symbol id="svgTheme0" viewBox="0 0 600 600">
-      <defs>
-        <linearGradient id="skyGrad0" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stop-color="#bae6fd"/>
-          <stop offset="100%" stop-color="#e0f2fe"/>
-        </linearGradient>
-        <linearGradient id="grassGrad0" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stop-color="#86efac"/>
-          <stop offset="100%" stop-color="#22c55e"/>
-        </linearGradient>
-      </defs>
-      <rect width="600" height="600" fill="url(#skyGrad0)"/>
-      <circle cx="500" cy="90" r="55" fill="#fde047" opacity="0.9"/>
-      <path d="M0,440 Q150,400 300,430 T600,420 L600,600 L0,600 Z" fill="url(#grassGrad0)"/>
-      <!-- 점자 유도 블록 길 -->
-      <path d="M 50,600 L 220,440 L 320,440 L 250,600 Z" fill="#facc15"/>
-      <g stroke="#ca8a04" stroke-width="3">
-        <line x1="80" y1="580" x2="235" y2="455"/>
-        <line x1="120" y1="580" x2="255" y2="455"/>
-        <line x1="160" y1="580" x2="275" y2="455"/>
-        <line x1="200" y1="580" x2="295" y2="455"/>
-      </g>
-      <!-- 안내견 (골든 리트리버) -->
-      <g transform="translate(140, 310)">
-        <ellipse cx="140" cy="120" rx="70" ry="45" fill="#f59e0b"/>
-        <!-- 다리 -->
-        <rect x="90" y="140" width="16" height="65" rx="8" fill="#d97706"/>
-        <rect x="120" y="140" width="16" height="60" rx="8" fill="#b45309"/>
-        <rect x="160" y="140" width="16" height="65" rx="8" fill="#d97706"/>
-        <rect x="185" y="140" width="16" height="60" rx="8" fill="#b45309"/>
-        <!-- 꼬리 -->
-        <path d="M70,110 Q40,90 45,65" stroke="#f59e0b" stroke-width="14" stroke-linecap="round" fill="none"/>
-        <!-- 하네스 조끼 -->
-        <path d="M115,85 Q145,80 175,100 L165,150 Q135,140 110,130 Z" fill="#ef4444"/>
-        <text x="124" y="125" font-size="12" font-weight="bold" fill="#ffffff">안내견</text>
-        <!-- 머리 -->
-        <circle cx="210" cy="85" r="35" fill="#f59e0b"/>
-        <ellipse cx="235" cy="95" rx="20" ry="16" fill="#fbbf24"/>
-        <ellipse cx="248" cy="90" rx="7" ry="5" fill="#1e293b"/>
-        <circle cx="215" cy="78" r="5" fill="#1e293b"/>
-        <ellipse cx="185" cy="90" rx="10" ry="24" fill="#b45309"/>
-        <!-- 하네스 손잡이 -->
-        <path d="M135,80 L 150, -40" stroke="#f87171" stroke-width="8" stroke-linecap="round"/>
-      </g>
-      <!-- 시각장애 어린이 -->
-      <g transform="translate(290, 160)">
-        <!-- 다리/신발 -->
-        <rect x="35" y="240" width="18" height="130" rx="6" fill="#3b82f6"/>
-        <rect x="65" y="240" width="18" height="130" rx="6" fill="#2563eb"/>
-        <ellipse cx="40" cy="370" rx="16" ry="9" fill="#1e293b"/>
-        <ellipse cx="75" cy="370" rx="16" ry="9" fill="#1e293b"/>
-        <!-- 몸통/옷 -->
-        <rect x="20" y="120" width="80" height="130" rx="20" fill="#10b981"/>
-        <circle cx="60" cy="150" r="15" fill="#ffffff" opacity="0.3"/>
-        <!-- 머리/얼굴 -->
-        <circle cx="60" cy="65" r="45" fill="#fed7aa"/>
-        <!-- 선글라스 -->
-        <rect x="30" y="55" width="26" height="18" rx="6" fill="#1e293b"/>
-        <rect x="64" y="55" width="26" height="18" rx="6" fill="#1e293b"/>
-        <line x1="56" y1="64" x2="64" y2="64" stroke="#1e293b" stroke-width="3"/>
-        <!-- 미소 -->
-        <path d="M45,95 Q60,110 75,95" stroke="#ea580c" stroke-width="4" stroke-linecap="round" fill="none"/>
-        <!-- 머리카락 -->
-        <path d="M15,55 Q60,-5 105,55 Q85,15 60,20 Q35,15 15,55 Z" fill="#78350f"/>
-        <!-- 왼팔 (안내견 하네스 잡기) -->
-        <path d="M25,140 Q-10,180 0,220" stroke="#fed7aa" stroke-width="16" stroke-linecap="round" fill="none"/>
-        <!-- 오른팔 (흰지팡이 쥐기) -->
-        <path d="M90,140 Q130,200 120,240" stroke="#fed7aa" stroke-width="16" stroke-linecap="round" fill="none"/>
-        <!-- 흰지팡이 -->
-        <line x1="120" y1="240" x2="230" y2="370" stroke="#e2e8f0" stroke-width="6" stroke-linecap="round"/>
-        <line x1="205" y1="340" x2="230" y2="370" stroke="#ef4444" stroke-width="6" stroke-linecap="round"/>
-      </g>
-      <!-- 희망의 문구 -->
-      <rect x="30" y="30" width="260" height="42" rx="10" fill="#ffffff" opacity="0.9"/>
-      <text x="45" y="58" font-size="18" font-weight="900" fill="#1e3a8a">🦮 함께 걸으면 안전해요</text>
-    </symbol>
-
-    <!-- 테마 1: 손으로 전하는 마음 (수어) -->
-    <symbol id="svgTheme1" viewBox="0 0 600 600">
-      <defs>
-        <linearGradient id="skyGrad1" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0%" stop-color="#fdf4ff"/>
-          <stop offset="100%" stop-color="#fae8ff"/>
-        </linearGradient>
-      </defs>
-      <rect width="600" height="600" fill="url(#skyGrad1)"/>
-      <circle cx="300" cy="270" r="190" fill="#f5d0fe" opacity="0.4"/>
-      <!-- 큰 하트 배경 -->
-      <path d="M300,480 C150,380 80,260 120,160 C150,90 240,100 300,170 C360,100 450,90 480,160 C520,260 450,380 300,480 Z" fill="#ec4899" opacity="0.2"/>
-      <!-- 수어 '사랑합니다' 손모양들 (왼쪽 친구 & 오른쪽 친구) -->
-      <!-- 왼쪽 친구 -->
-      <g transform="translate(100, 180)">
-        <circle cx="80" cy="80" r="50" fill="#fde68a"/>
-        <!-- 눈웃음 -->
-        <path d="M60,75 Q70,65 80,75" stroke="#854d0e" stroke-width="4" stroke-linecap="round" fill="none"/>
-        <path d="M90,75 Q100,65 110,75" stroke="#854d0e" stroke-width="4" stroke-linecap="round" fill="none"/>
-        <path d="M70,95 Q85,115 100,95" stroke="#ef4444" stroke-width="4" stroke-linecap="round" fill="none"/>
-        <!-- 몸통 -->
-        <rect x="30" y="140" width="100" height="150" rx="20" fill="#a855f7"/>
-        <!-- 수어 손 모양 (I Love You 손짓: 엄지, 검지, 새끼손가락) -->
-        <g transform="translate(100, 120)">
-          <path d="M0,40 Q20,-10 30,-30 Q35,-10 30,30" stroke="#fde68a" stroke-width="12" stroke-linecap="round" fill="#fde68a"/>
-          <path d="M30,40 Q60,10 70,-20 Q75,0 55,35" stroke="#fde68a" stroke-width="10" stroke-linecap="round" fill="#fde68a"/>
-          <path d="M-10,30 Q-30,20 -40,10" stroke="#fde68a" stroke-width="12" stroke-linecap="round" fill="#fde68a"/>
-          <ellipse cx="20" cy="40" rx="25" ry="20" fill="#fde68a"/>
-        </g>
-      </g>
-      <!-- 오른쪽 친구 -->
-      <g transform="translate(320, 180)">
-        <circle cx="80" cy="80" r="50" fill="#fed7aa"/>
-        <!-- 눈웃음 -->
-        <path d="M60,75 Q70,65 80,75" stroke="#9a3412" stroke-width="4" stroke-linecap="round" fill="none"/>
-        <path d="M90,75 Q100,65 110,75" stroke="#9a3412" stroke-width="4" stroke-linecap="round" fill="none"/>
-        <path d="M70,95 Q85,115 100,95" stroke="#ef4444" stroke-width="4" stroke-linecap="round" fill="none"/>
-        <!-- 몸통 -->
-        <rect x="30" y="140" width="100" height="150" rx="20" fill="#06b6d4"/>
-        <!-- 손짓 -->
-        <g transform="translate(10, 120)">
-          <circle cx="20" cy="40" r="22" fill="#fed7aa"/>
-          <path d="M20,30 Q40,-20 45,-30" stroke="#fed7aa" stroke-width="12" stroke-linecap="round"/>
-        </g>
-      </g>
-      <!-- 반짝이는 별/하트 아이콘 -->
-      <text x="280" y="170" font-size="40">💖</text>
-      <text x="120" y="140" font-size="28">✨</text>
-      <text x="440" y="140" font-size="28">✨</text>
-      <!-- 하단 안내 배너 -->
-      <rect x="40" y="490" width="520" height="65" rx="14" fill="#ffffff" opacity="0.95"/>
-      <text x="300" y="530" font-size="22" font-weight="900" fill="#701a75" text-anchor="middle">🤟 눈으로 말해요! 수어는 아름다운 언어입니다</text>
-    </symbol>
-
-    <!-- 테마 2: 자유로운 바퀴 (휠체어 스포츠 & 보치아) -->
-    <symbol id="svgTheme2" viewBox="0 0 600 600">
-      <defs>
-        <linearGradient id="courtGrad2" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stop-color="#fed7aa"/>
-          <stop offset="100%" stop-color="#fdba74"/>
-        </linearGradient>
-      </defs>
-      <rect width="600" height="600" fill="#f8fafc"/>
-      <!-- 체육관 코트 바닥 -->
-      <rect y="320" width="600" height="280" fill="url(#courtGrad2)"/>
-      <path d="M 0,380 L 600,380" stroke="#ffffff" stroke-width="6" opacity="0.8"/>
-      <circle cx="300" cy="460" r="90" stroke="#ffffff" stroke-width="6" fill="none" opacity="0.8"/>
-      <!-- 보치아 공들 -->
-      <!-- 흰색 표적구 -->
-      <circle cx="300" cy="460" r="22" fill="#ffffff" stroke="#cbd5e1" stroke-width="4"/>
-      <!-- 빨간공 -->
-      <circle cx="260" cy="445" r="24" fill="#ef4444" stroke="#991b1b" stroke-width="3"/>
-      <!-- 파란공 -->
-      <circle cx="340" cy="480" r="24" fill="#3b82f6" stroke="#1e40af" stroke-width="3"/>
-      <!-- 스포츠 휠체어 선수 (활기찬 포즈) -->
-      <g transform="translate(180, 110)">
-        <!-- 뒷바퀴 (기울어진 캠버 각도) -->
-        <ellipse cx="120" cy="270" rx="65" ry="60" fill="none" stroke="#3b82f6" stroke-width="12"/>
-        <ellipse cx="120" cy="270" rx="30" ry="28" fill="none" stroke="#60a5fa" stroke-width="5"/>
-        <circle cx="120" cy="270" r="10" fill="#1e293b"/>
-        <!-- 좌석 프레임 -->
-        <path d="M70,260 L 110,230 L 140,230 L 170,270" stroke="#1e293b" stroke-width="10" stroke-linecap="round" fill="none"/>
-        <!-- 선수 몸통 -->
-        <rect x="85" y="130" width="70" height="110" rx="16" fill="#f97316"/>
-        <text x="120" y="195" font-size="28" font-weight="900" fill="#ffffff" text-anchor="middle">7</text>
-        <!-- 선수 머리/헬멧 -->
-        <circle cx="120" cy="80" r="40" fill="#fed7aa"/>
-        <path d="M80,75 Q120,25 160,75 Z" fill="#3b82f6"/>
-        <!-- 환한 미소 -->
-        <circle cx="132" cy="85" r="5" fill="#1e293b"/>
-        <path d="M115,100 Q130,112 145,100" stroke="#c2410c" stroke-width="4" stroke-linecap="round" fill="none"/>
-        <!-- 공을 던지는 멋진 팔동작 -->
-        <path d="M140,150 Q190,130 220,110" stroke="#fed7aa" stroke-width="16" stroke-linecap="round" fill="none"/>
-        <circle cx="230" cy="105" r="18" fill="#ef4444"/>
-      </g>
-      <!-- 승리의 트로피와 별 -->
-      <text x="470" y="100" font-size="60">🏆</text>
-      <text x="80" y="120" font-size="40">⭐</text>
-      <!-- 상단 타이틀 -->
-      <rect x="40" y="30" width="340" height="48" rx="12" fill="#1e293b" opacity="0.9"/>
-      <text x="60" y="62" font-size="20" font-weight="900" fill="#38bdf8">♿ 규칙을 바꾸면 모두가 챔피언!</text>
-    </symbol>
-  </svg>
-
-  <!-- =========================================================================
-       스크립트: Web Audio API 3중 소음 신시사이저 & 인터랙티브 직소 퍼즐 엔진
-       ========================================================================= -->
   <script>
     /* -------------------------------------------------------------------------
      * 1. 전역 상태 관리
      * ------------------------------------------------------------------------- */
-    let gridSize = 3; // 2(4조각), 3(9조각), 4(16조각), 5(25조각)
-    let currentTheme = 0; // 0, 1, 2
+    let gridSize = 3;
+    let currentTheme = 0;
     let isNoiseOn = true;
     let showHint = false;
 
@@ -756,16 +551,16 @@
     let elapsedSeconds = 0;
     let isGameCompleted = false;
 
-    // 퍼즐 캔버스 & 컨텍스트
     const boardCanvas = document.getElementById('boardCanvas');
     const boardCtx = boardCanvas.getContext('2d');
     const trayCanvas = document.getElementById('trayCanvas');
     const trayCtx = trayCanvas.getContext('2d');
 
-    // 렌더링된 테마 원본 이미지 버퍼 (Canvas)
-    let sourceImageCanvas = document.createElement('canvas');
-    let sourceImageCtx = sourceImageCanvas.getContext('2d');
-    const IMAGE_RES = 600; // 고해상도 정사각형 텍스처
+    const sourceImageCanvas = document.createElement('canvas');
+    const sourceImageCtx = sourceImageCanvas.getContext('2d');
+    const IMAGE_RES = 600;
+    sourceImageCanvas.width = IMAGE_RES;
+    sourceImageCanvas.height = IMAGE_RES;
 
     let pieces = [];
     let selectedPiece = null;
@@ -774,209 +569,34 @@
     let puzzleHeight = 0;
 
     /* -------------------------------------------------------------------------
-     * 2. Web Audio API 실감형 교실 웅성거림 & 의자 끄는 소리 합성 엔진
+     * 2. 실제 교실 웅성거림 MP3 + 시계 초침 사운드 엔진
      * ------------------------------------------------------------------------- */
     let audioCtx = null;
     let masterGain = null;
-    let babbleGain = null;
-    let isAudioInitialized = false;
-
     let tickTimer = null;
-    let chairTimer = null;
-    let babbleInterval = null;
+    const bgAudio = document.getElementById('bgAudio');
 
     function initAudio() {
-      if (isAudioInitialized && audioCtx) return;
-      try {
+      if (!audioCtx) {
         const AudioContext = window.AudioContext || window.webkitAudioContext;
         audioCtx = new AudioContext();
-
         masterGain = audioCtx.createGain();
         masterGain.gain.setValueAtTime(isNoiseOn ? 0.75 : 0.0, audioCtx.currentTime);
         masterGain.connect(audioCtx.destination);
 
-        // ① 실감나는 다중 인물 교실 웅성거림 (Multi-Voice Babble / Chatter)
-        startClassroomBabble();
-
-        // ② 시계 초침 소리 (1초마다 틱-톡)
         startClockTicks();
+      }
 
-        // ③ 바닥 의자 끄는 소리 (끼이익~) & 돌발 교실 소음
-        startChairAndDisturbances();
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
 
-        isAudioInitialized = true;
-      } catch (e) {
-        console.warn("AudioContext 생성 실패:", e);
+      if (isNoiseOn && bgAudio) {
+        bgAudio.volume = 0.65;
+        bgAudio.play().catch(e => console.log('Autoplay waiting for touch'));
       }
     }
 
-    // ① 실감나는 교실 웅성거림 (다중 음성 포먼트 + 속삭임 믹싱)
-    function startClassroomBabble() {
-      if (!audioCtx) return;
-
-      babbleGain = audioCtx.createGain();
-      babbleGain.gain.setValueAtTime(0.55, audioCtx.currentTime);
-      babbleGain.connect(masterGain);
-
-      // 배경 핑크 노이즈 (속삭임과 교실 공기감)
-      const bufferSize = audioCtx.sampleRate * 3;
-      const noiseBuffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
-      const output = noiseBuffer.getChannelData(0);
-      let b0 = 0, b1 = 0, b2 = 0, b3 = 0, b4 = 0, b5 = 0, b6 = 0;
-      for (let i = 0; i < bufferSize; i++) {
-        const white = Math.random() * 2 - 1;
-        b0 = 0.99886 * b0 + white * 0.0555179;
-        b1 = 0.99332 * b1 + white * 0.0750759;
-        b2 = 0.96900 * b2 + white * 0.1538520;
-        b3 = 0.86650 * b3 + white * 0.3104856;
-        b4 = 0.55000 * b4 + white * 0.5329522;
-        b5 = -0.7616 * b5 - white * 0.0168980;
-        output[i] = (b0 + b1 + b2 + b3 + b4 + b5 + b6 + white * 0.5362) * 0.14;
-        b6 = white * 0.115926;
-      }
-      const whisperNoise = audioCtx.createBufferSource();
-      whisperNoise.buffer = noiseBuffer;
-      whisperNoise.loop = true;
-
-      const whisperFilter = audioCtx.createBiquadFilter();
-      whisperFilter.type = 'bandpass';
-      whisperFilter.frequency.setValueAtTime(1100, audioCtx.currentTime);
-      whisperFilter.Q.setValueAtTime(1.8, audioCtx.currentTime);
-
-      whisperNoise.connect(whisperFilter);
-      whisperFilter.connect(babbleGain);
-      whisperNoise.start();
-
-      // 4명의 가상 친구들이 교실에서 동시에 중얼거리는 목소리 포먼트 생성
-      const voicePitches = [135, 175, 210, 260]; // 남자아이/여자아이 다양한 음높이
-      voicePitches.forEach((pitch, idx) => {
-        const osc = audioCtx.createOscillator();
-        const vGain = audioCtx.createGain();
-        const formantFilter = audioCtx.createBiquadFilter();
-
-        osc.type = 'sawtooth';
-        osc.frequency.setValueAtTime(pitch, audioCtx.currentTime);
-
-        // 포먼트 대역 (모음 발음 주파수 대역)
-        formantFilter.type = 'bandpass';
-        formantFilter.frequency.setValueAtTime(500 + idx * 250, audioCtx.currentTime);
-        formantFilter.Q.setValueAtTime(4.0, audioCtx.currentTime);
-
-        vGain.gain.setValueAtTime(0.08, audioCtx.currentTime);
-
-        // 무작위로 말하는 듯한 음절(Syllable) 리듬 변조
-        const lfoRate = 2.5 + Math.random() * 2.5; // 초당 2~5개 음절
-        const lfo = audioCtx.createOscillator();
-        const lfoGain = audioCtx.createGain();
-        lfo.frequency.value = lfoRate;
-        lfoGain.gain.value = 0.07;
-        lfo.connect(lfoGain);
-        lfoGain.connect(vGain.gain);
-        lfo.start();
-
-        // 모음 필터 주파수 변조 (아, 에, 오, 우 모음 변화 시뮬레이션)
-        const filterLfo = audioCtx.createOscillator();
-        const filterLfoGain = audioCtx.createGain();
-        filterLfo.frequency.value = 1.2 + idx * 0.4;
-        filterLfoGain.gain.value = 350;
-        filterLfo.connect(filterLfoGain);
-        filterLfoGain.connect(formantFilter.frequency);
-        filterLfo.start();
-
-        osc.connect(formantFilter);
-        formantFilter.connect(vGain);
-        vGain.connect(babbleGain);
-        osc.start();
-      });
-
-      // 주기적으로 웅성거리는 말소리 덩어리(Burst) 추가
-      if (babbleInterval) clearInterval(babbleInterval);
-      babbleInterval = setInterval(() => {
-        if (!isNoiseOn || !audioCtx || audioCtx.state !== 'running') return;
-        playChatterSyllables();
-      }, 700);
-    }
-
-    // 짧은 말소리 옹알이 팝 (웅성웅성)
-    function playChatterSyllables() {
-      if (!audioCtx || !isNoiseOn) return;
-      try {
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-        const filter = audioCtx.createBiquadFilter();
-
-        const f0 = 150 + Math.random() * 200;
-        osc.type = 'sawtooth';
-        osc.frequency.setValueAtTime(f0, audioCtx.currentTime);
-        osc.frequency.linearRampToValueAtTime(f0 + (Math.random() - 0.5) * 80, audioCtx.currentTime + 0.25);
-
-        filter.type = 'bandpass';
-        filter.frequency.setValueAtTime(600 + Math.random() * 1200, audioCtx.currentTime);
-        filter.Q.setValueAtTime(5.0, audioCtx.currentTime);
-
-        gain.gain.setValueAtTime(0.001, audioCtx.currentTime);
-        gain.gain.linearRampToValueAtTime(0.12, audioCtx.currentTime + 0.08);
-        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.3);
-
-        osc.connect(filter);
-        filter.connect(gain);
-        gain.connect(babbleGain);
-
-        osc.start();
-        osc.stop(audioCtx.currentTime + 0.32);
-      } catch (e) {}
-    }
-
-    // ② 의자 바닥 끄는 소리 (끼이이익~ 끽!)
-    function playChairScreech() {
-      if (!audioCtx || !isNoiseOn) return;
-      try {
-        const duration = 0.4 + Math.random() * 0.5; // 0.4~0.9초
-        const osc = audioCtx.createOscillator();
-        const osc2 = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-        const filter = audioCtx.createBiquadFilter();
-
-        // 쇳소리/마찰음 날카로운 주파수
-        osc.type = 'sawtooth';
-        const baseFreq = 1600 + Math.random() * 800;
-        osc.frequency.setValueAtTime(baseFreq, audioCtx.currentTime);
-        osc.frequency.linearRampToValueAtTime(baseFreq - 300, audioCtx.currentTime + duration);
-
-        osc2.type = 'sawtooth';
-        osc2.frequency.setValueAtTime(baseFreq * 1.33, audioCtx.currentTime);
-        osc2.frequency.linearRampToValueAtTime(baseFreq * 1.1, audioCtx.currentTime + duration);
-
-        // 마찰 진동 모듈레이션
-        const mod = audioCtx.createOscillator();
-        const modGain = audioCtx.createGain();
-        mod.frequency.value = 45; // 45Hz 거친 떨림
-        modGain.gain.value = 400;
-        mod.connect(modGain);
-        modGain.connect(osc.frequency);
-        mod.start();
-        mod.stop(audioCtx.currentTime + duration);
-
-        filter.type = 'highpass';
-        filter.frequency.setValueAtTime(1000, audioCtx.currentTime);
-
-        gain.gain.setValueAtTime(0.01, audioCtx.currentTime);
-        gain.gain.linearRampToValueAtTime(0.35, audioCtx.currentTime + 0.05); // 의자 소리 강조
-        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
-
-        osc.connect(filter);
-        osc2.connect(filter);
-        filter.connect(gain);
-        gain.connect(masterGain);
-
-        osc.start();
-        osc2.start();
-        osc.stop(audioCtx.currentTime + duration + 0.02);
-        osc2.stop(audioCtx.currentTime + duration + 0.02);
-      } catch (e) {}
-    }
-
-    // 시계 초침 사운드 (틱-톡)
     function playTickSound(isTock) {
       if (!audioCtx || !isNoiseOn) return;
       try {
@@ -1009,146 +629,8 @@
       }, 950);
     }
 
-    // 의자 끄는 소리 및 교실 돌발 잡음 루프 (3~6초마다)
-    function startChairAndDisturbances() {
-      if (chairTimer) clearInterval(chairTimer);
-      chairTimer = setInterval(() => {
-        if (!isNoiseOn || !audioCtx || audioCtx.state !== 'running') return;
-        
-        const rand = Math.random();
-        if (rand < 0.55) {
-          // 의자 끄는 소리
-          playChairScreech();
-        } else if (rand < 0.8) {
-          // 연필/책상 톡톡 소리
-          playDeskTap();
-        } else {
-          // 책장 넘기는 소리
-          playPageFlip();
-        }
-      }, 3800);
-    }
-
-    // 책상 톡톡 소리
-    function playDeskTap() {
-      if (!audioCtx || !isNoiseOn) return;
-      try {
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-        osc.type = 'triangle';
-        osc.frequency.setValueAtTime(320, audioCtx.currentTime);
-        osc.frequency.exponentialRampToValueAtTime(50, audioCtx.currentTime + 0.06);
-        gain.gain.setValueAtTime(0.35, audioCtx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.06);
-        osc.connect(gain);
-        gain.connect(masterGain);
-        osc.start();
-        osc.stop(audioCtx.currentTime + 0.07);
-      } catch (e) {}
-    }
-
-    // 책장 넘기는 파라락 소리
-    function playPageFlip() {
-      if (!audioCtx || !isNoiseOn) return;
-      try {
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-        osc.type = 'sawtooth';
-        osc.frequency.setValueAtTime(800, audioCtx.currentTime);
-        gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.15);
-        osc.connect(gain);
-        gain.connect(masterGain);
-        osc.start();
-        osc.stop(audioCtx.currentTime + 0.16);
-      } catch (e) {}
-    }
-
-    // 시계 초침 사운드 (틱-톡)
-    function playTickSound(isTock) {
-      if (!audioCtx || !isNoiseOn) return;
-      try {
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-
-        osc.type = 'sine';
-        // 틱(1200Hz) / 톡(850Hz) 교대
-        osc.frequency.setValueAtTime(isTock ? 850 : 1200, audioCtx.currentTime);
-        osc.frequency.exponentialRampToValueAtTime(120, audioCtx.currentTime + 0.04);
-
-        gain.gain.setValueAtTime(0.35, audioCtx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.04);
-
-        osc.connect(gain);
-        gain.connect(masterGain);
-
-        osc.start();
-        osc.stop(audioCtx.currentTime + 0.05);
-      } catch (e) {}
-    }
-
-    let isTockState = false;
-    function startClockTicks() {
-      if (tickTimer) clearInterval(tickTimer);
-      tickTimer = setInterval(() => {
-        if (isNoiseOn && audioCtx && audioCtx.state === 'running') {
-          playTickSound(isTockState);
-          isTockState = !isTockState;
-        }
-      }, 950);
-    }
-
-    // 불규칙 돌발 자극음 (가끔씩 툭, 딩, 삐-)
-    function playSuddenDisturbance() {
-      if (!audioCtx || !isNoiseOn || Math.random() < 0.3) return;
-      try {
-        const type = Math.floor(Math.random() * 3);
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-
-        if (type === 0) {
-          // 알림 띵 소리
-          osc.type = 'triangle';
-          osc.frequency.setValueAtTime(1400, audioCtx.currentTime);
-          gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
-          gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.4);
-          osc.start();
-          osc.stop(audioCtx.currentTime + 0.42);
-        } else if (type === 1) {
-          // 툭 치는 소리
-          osc.type = 'sine';
-          osc.frequency.setValueAtTime(220, audioCtx.currentTime);
-          osc.frequency.exponentialRampToValueAtTime(40, audioCtx.currentTime + 0.1);
-          gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
-          gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.1);
-          osc.start();
-          osc.stop(audioCtx.currentTime + 0.12);
-        } else {
-          // 짧은 형광등 윙 소리
-          osc.type = 'sawtooth';
-          osc.frequency.setValueAtTime(120, audioCtx.currentTime);
-          gain.gain.setValueAtTime(0.12, audioCtx.currentTime);
-          gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.3);
-          osc.start();
-          osc.stop(audioCtx.currentTime + 0.32);
-        }
-
-        osc.connect(gain);
-        gain.connect(masterGain);
-      } catch (e) {}
-    }
-
-    function startSuddenDisturbances() {
-      if (distTimer) clearInterval(distTimer);
-      distTimer = setInterval(playSuddenDisturbance, 3500);
-    }
-
-    // 소음 ON/OFF 전환
     function toggleNoise() {
       initAudio();
-      if (audioCtx && audioCtx.state === 'suspended') {
-        audioCtx.resume();
-      }
       isNoiseOn = !isNoiseOn;
       updateNoiseUI();
     }
@@ -1167,7 +649,16 @@
       const visualFx = document.getElementById('visualFx');
 
       if (masterGain && audioCtx) {
-        masterGain.gain.setValueAtTime(isNoiseOn ? 0.65 : 0.0, audioCtx.currentTime);
+        masterGain.gain.setValueAtTime(isNoiseOn ? 0.75 : 0.0, audioCtx.currentTime);
+      }
+
+      if (bgAudio) {
+        if (isNoiseOn) {
+          bgAudio.volume = 0.65;
+          bgAudio.play().catch(e => {});
+        } else {
+          bgAudio.pause();
+        }
       }
 
       if (isNoiseOn) {
@@ -1175,7 +666,7 @@
         icon.innerText = '🔊';
         text.innerText = '감각과부하 소음 [ON]';
         indicator.classList.remove('quiet');
-        indicator.innerHTML = '<span>⚠️ <strong>[감각 과부하 소음 재생 중]</strong> 시계 초침 + 교실 웅성거림 + 불규칙 소음이 집중력을 방해하고 있습니다.</span><span>볼륨: 적정 안전 수준(65dB) 고정</span>';
+        indicator.innerHTML = '<span>⚠️ <strong>[감각 과부하 소음 재생 중]</strong> 실제 교실 웅성거림 + 시계 초침 소리가 집중력을 방해하고 있습니다.</span><span>볼륨: 적정 안전 수준(65dB) 고정</span>';
         visualFx.classList.add('active');
       } else {
         btn.classList.add('muted');
@@ -1188,31 +679,352 @@
     }
 
     /* -------------------------------------------------------------------------
-     * 3. SVG 그래픽 테마 텍스처 렌더링
+     * 3. Canvas 2D 직접 렌더러 (100% 안정적 렌더링)
      * ------------------------------------------------------------------------- */
-    function renderSvgToCanvas(themeIndex, callback) {
-      sourceImageCanvas.width = IMAGE_RES;
-      sourceImageCanvas.height = IMAGE_RES;
+    function drawDirectTheme(themeIndex) {
+      const ctx = sourceImageCtx;
+      const w = IMAGE_RES;
+      const h = IMAGE_RES;
+      ctx.clearRect(0, 0, w, h);
 
-      const svgSymbol = document.getElementById(`svgTheme${themeIndex}`);
-      const serializer = new XMLSerializer();
-      const svgString = `<svg xmlns="http://www.w3.org/2000/svg" width="${IMAGE_RES}" height="${IMAGE_RES}" viewBox="0 0 600 600">${svgSymbol.innerHTML}</svg>`;
+      if (themeIndex === 0) {
+        // 테마 0: 안내견과 시각장애 어린이
+        const skyGrad = ctx.createLinearGradient(0, 0, 0, h);
+        skyGrad.addColorStop(0, '#bae6fd');
+        skyGrad.addColorStop(1, '#e0f2fe');
+        ctx.fillStyle = skyGrad;
+        ctx.fillRect(0, 0, w, h);
 
-      const img = new Image();
-      const svgBlob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' });
-      const url = URL.createObjectURL(svgBlob);
+        ctx.fillStyle = '#fde047';
+        ctx.beginPath();
+        ctx.arc(500, 90, 50, 0, Math.PI * 2);
+        ctx.fill();
 
-      img.onload = () => {
-        sourceImageCtx.clearRect(0, 0, IMAGE_RES, IMAGE_RES);
-        sourceImageCtx.drawImage(img, 0, 0, IMAGE_RES, IMAGE_RES);
-        URL.revokeObjectURL(url);
-        if (callback) callback();
-      };
-      img.src = url;
+        const grassGrad = ctx.createLinearGradient(0, 400, 0, h);
+        grassGrad.addColorStop(0, '#86efac');
+        grassGrad.addColorStop(1, '#22c55e');
+        ctx.fillStyle = grassGrad;
+        ctx.beginPath();
+        ctx.moveTo(0, 440);
+        ctx.bezierCurveTo(150, 400, 300, 430, 600, 420);
+        ctx.lineTo(600, 600);
+        ctx.lineTo(0, 600);
+        ctx.closePath();
+        ctx.fill();
+
+        ctx.fillStyle = '#facc15';
+        ctx.beginPath();
+        ctx.moveTo(50, 600);
+        ctx.lineTo(220, 440);
+        ctx.lineTo(320, 440);
+        ctx.lineTo(250, 600);
+        ctx.closePath();
+        ctx.fill();
+
+        ctx.strokeStyle = '#ca8a04';
+        ctx.lineWidth = 3;
+        for (let i = 0; i < 4; i++) {
+          ctx.beginPath();
+          ctx.moveTo(80 + i * 40, 580);
+          ctx.lineTo(235 + i * 20, 455);
+          ctx.stroke();
+        }
+
+        ctx.save();
+        ctx.translate(140, 310);
+        ctx.fillStyle = '#f59e0b';
+        ctx.beginPath();
+        ctx.ellipse(140, 120, 70, 45, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle = '#d97706';
+        ctx.fillRect(90, 140, 16, 65);
+        ctx.fillRect(160, 140, 16, 65);
+        ctx.fillStyle = '#b45309';
+        ctx.fillRect(120, 140, 16, 60);
+        ctx.fillRect(185, 140, 16, 60);
+
+        ctx.fillStyle = '#ef4444';
+        ctx.beginPath();
+        ctx.moveTo(115, 85);
+        ctx.quadraticCurveTo(145, 80, 175, 100);
+        ctx.lineTo(165, 150);
+        ctx.quadraticCurveTo(135, 140, 110, 130);
+        ctx.closePath();
+        ctx.fill();
+        ctx.fillStyle = '#ffffff';
+        ctx.font = 'bold 12px sans-serif';
+        ctx.fillText('안내견', 124, 125);
+
+        ctx.fillStyle = '#f59e0b';
+        ctx.beginPath();
+        ctx.arc(210, 85, 35, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = '#fbbf24';
+        ctx.beginPath();
+        ctx.ellipse(235, 95, 20, 16, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = '#1e293b';
+        ctx.beginPath();
+        ctx.arc(215, 78, 5, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.ellipse(248, 90, 7, 5, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.strokeStyle = '#f87171';
+        ctx.lineWidth = 8;
+        ctx.lineCap = 'round';
+        ctx.beginPath();
+        ctx.moveTo(135, 80);
+        ctx.lineTo(150, -40);
+        ctx.stroke();
+        ctx.restore();
+
+        ctx.save();
+        ctx.translate(290, 160);
+        ctx.fillStyle = '#3b82f6';
+        ctx.fillRect(35, 240, 18, 130);
+        ctx.fillRect(65, 240, 18, 130);
+        ctx.fillStyle = '#1e293b';
+        ctx.beginPath();
+        ctx.ellipse(40, 370, 16, 9, 0, 0, Math.PI * 2);
+        ctx.ellipse(75, 370, 16, 9, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle = '#10b981';
+        ctx.beginPath();
+        ctx.roundRect(20, 120, 80, 130, 20);
+        ctx.fill();
+
+        ctx.fillStyle = '#fed7aa';
+        ctx.beginPath();
+        ctx.arc(60, 65, 45, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle = '#1e293b';
+        ctx.beginPath();
+        ctx.roundRect(30, 55, 26, 18, 6);
+        ctx.roundRect(64, 55, 26, 18, 6);
+        ctx.fill();
+        ctx.strokeStyle = '#1e293b';
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.moveTo(56, 64);
+        ctx.lineTo(64, 64);
+        ctx.stroke();
+
+        ctx.strokeStyle = '#ea580c';
+        ctx.lineWidth = 4;
+        ctx.beginPath();
+        ctx.arc(60, 85, 12, 0.2 * Math.PI, 0.8 * Math.PI);
+        ctx.stroke();
+
+        ctx.fillStyle = '#78350f';
+        ctx.beginPath();
+        ctx.arc(60, 55, 46, Math.PI, Math.PI * 2);
+        ctx.fill();
+
+        ctx.strokeStyle = '#e2e8f0';
+        ctx.lineWidth = 6;
+        ctx.beginPath();
+        ctx.moveTo(120, 240);
+        ctx.lineTo(230, 370);
+        ctx.stroke();
+        ctx.strokeStyle = '#ef4444';
+        ctx.beginPath();
+        ctx.moveTo(205, 340);
+        ctx.lineTo(230, 370);
+        ctx.stroke();
+        ctx.restore();
+
+        ctx.fillStyle = 'rgba(255,255,255,0.95)';
+        ctx.beginPath();
+        ctx.roundRect(30, 30, 270, 45, 10);
+        ctx.fill();
+        ctx.fillStyle = '#1e3a8a';
+        ctx.font = '900 18px sans-serif';
+        ctx.fillText('🦮 함께 걸으면 안전해요', 45, 59);
+
+      } else if (themeIndex === 1) {
+        // 테마 1: 손으로 전하는 마음 (수어)
+        const skyGrad = ctx.createLinearGradient(0, 0, w, h);
+        skyGrad.addColorStop(0, '#fdf4ff');
+        skyGrad.addColorStop(1, '#fae8ff');
+        ctx.fillStyle = skyGrad;
+        ctx.fillRect(0, 0, w, h);
+
+        ctx.fillStyle = 'rgba(236, 72, 153, 0.2)';
+        ctx.beginPath();
+        ctx.arc(300, 270, 190, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle = 'rgba(244, 114, 182, 0.35)';
+        ctx.beginPath();
+        ctx.moveTo(300, 460);
+        ctx.bezierCurveTo(150, 360, 90, 240, 130, 150);
+        ctx.bezierCurveTo(160, 90, 250, 100, 300, 170);
+        ctx.bezierCurveTo(350, 100, 440, 90, 470, 150);
+        ctx.bezierCurveTo(510, 240, 450, 360, 300, 460);
+        ctx.fill();
+
+        ctx.save();
+        ctx.translate(120, 200);
+        ctx.fillStyle = '#a855f7';
+        ctx.beginPath();
+        ctx.roundRect(30, 140, 90, 140, 20);
+        ctx.fill();
+        ctx.fillStyle = '#fde68a';
+        ctx.beginPath();
+        ctx.arc(75, 75, 45, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = '#854d0e';
+        ctx.lineWidth = 4;
+        ctx.beginPath();
+        ctx.arc(58, 70, 10, Math.PI, 0);
+        ctx.arc(92, 70, 10, Math.PI, 0);
+        ctx.stroke();
+
+        ctx.fillStyle = '#fde68a';
+        ctx.beginPath();
+        ctx.ellipse(110, 140, 20, 18, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillRect(92, 95, 10, 45);
+        ctx.fillRect(120, 95, 10, 45);
+        ctx.restore();
+
+        ctx.save();
+        ctx.translate(330, 200);
+        ctx.fillStyle = '#06b6d4';
+        ctx.beginPath();
+        ctx.roundRect(30, 140, 90, 140, 20);
+        ctx.fill();
+        ctx.fillStyle = '#fed7aa';
+        ctx.beginPath();
+        ctx.arc(75, 75, 45, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = '#9a3412';
+        ctx.lineWidth = 4;
+        ctx.beginPath();
+        ctx.arc(58, 70, 10, Math.PI, 0);
+        ctx.arc(92, 70, 10, Math.PI, 0);
+        ctx.stroke();
+        ctx.fillStyle = '#fed7aa';
+        ctx.beginPath();
+        ctx.arc(30, 135, 18, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+
+        ctx.fillStyle = 'rgba(255,255,255,0.95)';
+        ctx.beginPath();
+        ctx.roundRect(40, 490, 520, 65, 14);
+        ctx.fill();
+        ctx.fillStyle = '#701a75';
+        ctx.font = '900 20px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('🤟 눈으로 말해요! 수어는 아름다운 언어입니다', 300, 530);
+        ctx.textAlign = 'left';
+
+      } else {
+        // 테마 2: 자유로운 바퀴
+        ctx.fillStyle = '#f8fafc';
+        ctx.fillRect(0, 0, w, h);
+
+        const courtGrad = ctx.createLinearGradient(0, 320, 0, h);
+        courtGrad.addColorStop(0, '#fed7aa');
+        courtGrad.addColorStop(1, '#fdba74');
+        ctx.fillStyle = courtGrad;
+        ctx.fillRect(0, 320, w, 280);
+
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = 5;
+        ctx.beginPath();
+        ctx.moveTo(0, 380);
+        ctx.lineTo(w, 380);
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.arc(300, 460, 90, 0, Math.PI * 2);
+        ctx.stroke();
+
+        ctx.fillStyle = '#ffffff';
+        ctx.strokeStyle = '#94a3b8';
+        ctx.lineWidth = 4;
+        ctx.beginPath();
+        ctx.arc(300, 460, 22, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.fillStyle = '#ef4444';
+        ctx.strokeStyle = '#991b1b';
+        ctx.beginPath();
+        ctx.arc(255, 445, 24, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.fillStyle = '#3b82f6';
+        ctx.strokeStyle = '#1e40af';
+        ctx.beginPath();
+        ctx.arc(345, 480, 24, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.save();
+        ctx.translate(190, 110);
+        ctx.strokeStyle = '#3b82f6';
+        ctx.lineWidth = 12;
+        ctx.beginPath();
+        ctx.ellipse(120, 270, 65, 60, 0, 0, Math.PI * 2);
+        ctx.stroke();
+
+        ctx.strokeStyle = '#1e293b';
+        ctx.lineWidth = 10;
+        ctx.lineCap = 'round';
+        ctx.beginPath();
+        ctx.moveTo(70, 260);
+        ctx.lineTo(110, 230);
+        ctx.lineTo(140, 230);
+        ctx.lineTo(170, 270);
+        ctx.stroke();
+
+        ctx.fillStyle = '#f97316';
+        ctx.beginPath();
+        ctx.roundRect(85, 130, 70, 110, 16);
+        ctx.fill();
+
+        ctx.fillStyle = '#fed7aa';
+        ctx.beginPath();
+        ctx.arc(120, 80, 38, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = '#3b82f6';
+        ctx.beginPath();
+        ctx.arc(120, 75, 40, Math.PI, Math.PI * 2);
+        ctx.fill();
+
+        ctx.strokeStyle = '#fed7aa';
+        ctx.lineWidth = 16;
+        ctx.beginPath();
+        ctx.moveTo(140, 150);
+        ctx.quadraticCurveTo(190, 130, 220, 110);
+        ctx.stroke();
+        ctx.fillStyle = '#ef4444';
+        ctx.beginPath();
+        ctx.arc(230, 105, 18, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+
+        ctx.fillStyle = 'rgba(30, 41, 59, 0.9)';
+        ctx.beginPath();
+        ctx.roundRect(40, 30, 350, 48, 12);
+        ctx.fill();
+        ctx.fillStyle = '#38bdf8';
+        ctx.font = '900 19px sans-serif';
+        ctx.fillText('♿ 규칙을 바꾸면 모두가 챔피언!', 60, 62);
+      }
     }
 
     /* -------------------------------------------------------------------------
-     * 4. 직소 퍼즐 데이터 구조 & 조각 생성
+     * 4. 퍼즐 조각 클래스 & 생성 로직
      * ------------------------------------------------------------------------- */
     class PuzzlePiece {
       constructor(row, col, gridSize, pieceW, pieceH) {
@@ -1222,71 +1034,51 @@
         this.w = pieceW;
         this.h = pieceH;
 
-        // 올바른 보드 위 목표 좌표
         this.targetX = col * pieceW;
         this.targetY = row * pieceH;
-
-        // 현재 위치 (트레이 또는 보드 위 드래그 위치)
         this.currentX = 0;
         this.currentY = 0;
 
-        this.isLocked = false; // 보드에 올바르게 결합되었는지 여부
-        this.isInTray = true;  // 트레이에 있는지 여부
+        this.isLocked = false;
+        this.isInTray = true;
 
-        // 퍼즐 탭(돌기/홈) 방향 결정 (0: 직선, 1: 볼록 탭, -1: 오목 홈)
         this.topTab = 0;
         this.rightTab = 0;
         this.bottomTab = 0;
         this.leftTab = 0;
       }
 
-      // 조각 패스 그리기
       drawPath(ctx, originX, originY) {
         const x = originX;
         const y = originY;
         const w = this.w;
         const h = this.h;
-        const tabSize = Math.min(w, h) * 0.22; // 탭 크기
+        const tabSize = Math.min(w, h) * 0.22;
 
         ctx.beginPath();
         ctx.moveTo(x, y);
 
-        // 상단 변
-        if (this.topTab === 0) {
-          ctx.lineTo(x + w, y);
-        } else {
-          this.drawTabEdge(ctx, x, y, x + w, y, this.topTab * tabSize);
-        }
+        if (this.topTab === 0) ctx.lineTo(x + w, y);
+        else this.drawTabEdge(ctx, x, y, x + w, y, this.topTab * tabSize);
 
-        // 우측 변
-        if (this.rightTab === 0) {
-          ctx.lineTo(x + w, y + h);
-        } else {
-          this.drawTabEdge(ctx, x + w, y, x + w, y + h, this.rightTab * tabSize);
-        }
+        if (this.rightTab === 0) ctx.lineTo(x + w, y + h);
+        else this.drawTabEdge(ctx, x + w, y, x + w, y + h, this.rightTab * tabSize);
 
-        // 하단 변
-        if (this.bottomTab === 0) {
-          ctx.lineTo(x, y + h);
-        } else {
-          this.drawTabEdge(ctx, x + w, y + h, x, y + h, this.bottomTab * tabSize);
-        }
+        if (this.bottomTab === 0) ctx.lineTo(x, y + h);
+        else this.drawTabEdge(ctx, x + w, y + h, x, y + h, this.bottomTab * tabSize);
 
-        // 좌측 변
-        if (this.leftTab === 0) {
-          ctx.closePath();
-        } else {
+        if (this.leftTab === 0) ctx.closePath();
+        else {
           this.drawTabEdge(ctx, x, y + h, x, y, this.leftTab * tabSize);
           ctx.closePath();
         }
       }
 
-      // 부드러운 곡선 탭(돌기/홈) 베지어 곡선 그리기
       drawTabEdge(ctx, x1, y1, x2, y2, tabDepth) {
         const dx = x2 - x1;
         const dy = y2 - y1;
         const len = Math.sqrt(dx * dx + dy * dy);
-        const nx = -dy / len; // 법선 벡터
+        const nx = -dy / len;
         const ny = dx / len;
 
         const p1x = x1 + dx * 0.35, p1y = y1 + dy * 0.35;
@@ -1309,7 +1101,6 @@
         ctx.lineTo(x2, y2);
       }
 
-      // 조각 렌더링
       render(ctx, posX, posY, isDragging = false) {
         ctx.save();
         if (isDragging) {
@@ -1321,12 +1112,11 @@
 
         this.drawPath(ctx, posX, posY);
         ctx.save();
-        ctx.clip(); // 조각 모양대로 클리핑
+        ctx.clip();
 
-        // 원본 이미지에서 해당 타일 영역 추출 및 렌더링
         const srcTileW = IMAGE_RES / this.gridSize;
         const srcTileH = IMAGE_RES / this.gridSize;
-        const marginRatio = 0.35; // 탭 여유분
+        const marginRatio = 0.35;
         const srcMarginX = srcTileW * marginRatio;
         const srcMarginY = srcTileH * marginRatio;
 
@@ -1345,7 +1135,6 @@
         ctx.drawImage(sourceImageCanvas, sx, sy, sw, sh, dx, dy, dw, dh);
         ctx.restore();
 
-        // 조각 외곽선 강조
         ctx.strokeStyle = this.isLocked ? 'rgba(255,255,255,0.4)' : (isDragging ? '#38bdf8' : '#64748b');
         ctx.lineWidth = isDragging ? 2.5 : (this.isLocked ? 1 : 1.5);
         ctx.stroke();
@@ -1353,7 +1142,6 @@
         ctx.restore();
       }
 
-      // 포인트가 이 조각 내부에 있는지 충돌 검사
       containsPoint(px, py, posX, posY) {
         const margin = this.w * 0.2;
         return (
@@ -1365,35 +1153,28 @@
       }
     }
 
-    /* -------------------------------------------------------------------------
-     * 5. 퍼즐 생성 및 배치 로직
-     * ------------------------------------------------------------------------- */
     function createPuzzlePieces() {
       pieces = [];
       const pieceW = puzzleWidth / gridSize;
       const pieceH = puzzleHeight / gridSize;
 
-      // 1. 조각 기본 생성
       for (let r = 0; r < gridSize; r++) {
         for (let c = 0; c < gridSize; c++) {
           pieces.push(new PuzzlePiece(r, c, gridSize, pieceW, pieceH));
         }
       }
 
-      // 2. 이웃 조각 간 서로 맞물리는 탭(1 vs -1) 생성
       for (let r = 0; r < gridSize; r++) {
         for (let c = 0; c < gridSize; c++) {
           const idx = r * gridSize + c;
           const current = pieces[idx];
 
-          // 우측 이웃과 맞물림
           if (c < gridSize - 1) {
             const rightNeighbor = pieces[r * gridSize + (c + 1)];
             const tabType = Math.random() < 0.5 ? 1 : -1;
             current.rightTab = tabType;
             rightNeighbor.leftTab = -tabType;
           }
-          // 하단 이웃과 맞물림
           if (r < gridSize - 1) {
             const bottomNeighbor = pieces[(r + 1) * gridSize + c];
             const tabType = Math.random() < 0.5 ? 1 : -1;
@@ -1403,7 +1184,6 @@
         }
       }
 
-      // 3. 트레이 영역 안에 무작위로 조각들 흩어놓기
       scatterPiecesInTray();
       updateProgressUI();
     }
@@ -1414,12 +1194,10 @@
       const pieceW = puzzleWidth / gridSize;
       const pieceH = puzzleHeight / gridSize;
 
-      // 트레이 내 격자 배치용 계산
       const cols = Math.ceil(Math.sqrt(pieces.length));
       const cellW = (trayW - 20) / cols;
       const cellH = (trayH - 20) / Math.ceil(pieces.length / cols);
 
-      // 무작위 셔플
       const shuffled = [...pieces].sort(() => Math.random() - 0.5);
 
       shuffled.forEach((piece, i) => {
@@ -1434,14 +1212,13 @@
         piece.currentX = 10 + col * cellW + (cellW - pieceW) / 2 + offsetX;
         piece.currentY = 10 + row * cellH + (cellH - pieceH) / 2 + offsetY;
 
-        // 경계 제한
         piece.currentX = Math.max(10, Math.min(trayW - pieceW - 10, piece.currentX));
         piece.currentY = Math.max(10, Math.min(trayH - pieceH - 10, piece.currentY));
       });
     }
 
     /* -------------------------------------------------------------------------
-     * 6. 캔버스 크기 리사이징 및 렌더링 루프
+     * 5. 리사이징 및 렌더링 루프
      * ------------------------------------------------------------------------- */
     function resizeCanvases() {
       const bContainer = document.getElementById('boardContainer');
@@ -1449,7 +1226,7 @@
 
       const maxBoardDim = Math.min(bContainer.clientWidth - 24, bContainer.clientHeight - 24, 450);
       puzzleWidth = Math.max(260, maxBoardDim);
-      puzzleHeight = puzzleWidth; // 정사각형
+      puzzleHeight = puzzleWidth;
 
       boardCanvas.width = puzzleWidth;
       boardCanvas.height = puzzleHeight;
@@ -1457,17 +1234,14 @@
       trayCanvas.width = tContainer.clientWidth - 20;
       trayCanvas.height = Math.max(300, tContainer.clientHeight - 60);
 
-      renderSvgToCanvas(currentTheme, () => {
-        createPuzzlePieces();
-        redrawAll();
-      });
+      drawDirectTheme(currentTheme);
+      createPuzzlePieces();
+      redrawAll();
     }
 
     function redrawAll() {
-      // 1. 보드 캔버스 그리기
       boardCtx.clearRect(0, 0, boardCanvas.width, boardCanvas.height);
 
-      // 밑그림 힌트가 켜져 있으면 반투명 원본 출력
       if (showHint) {
         boardCtx.save();
         boardCtx.globalAlpha = 0.22;
@@ -1475,7 +1249,6 @@
         boardCtx.restore();
       }
 
-      // 보드 위 가이드 눈금선
       boardCtx.strokeStyle = 'rgba(255, 255, 255, 0.08)';
       boardCtx.lineWidth = 1;
       const stepW = puzzleWidth / gridSize;
@@ -1492,18 +1265,15 @@
         boardCtx.stroke();
       }
 
-      // 보드에 이미 맞춘(Locked) 조각들 그리기
       pieces.filter(p => p.isLocked).forEach(p => {
         p.render(boardCtx, p.targetX, p.targetY, false);
       });
 
-      // 2. 트레이 캔버스 그리기
       trayCtx.clearRect(0, 0, trayCanvas.width, trayCanvas.height);
       pieces.filter(p => !p.isLocked && p !== selectedPiece).forEach(p => {
         p.render(trayCtx, p.currentX, p.currentY, false);
       });
 
-      // 3. 현재 드래그 중인 조각 최상위 렌더링
       if (selectedPiece) {
         const activeCtx = selectedPiece.isInTray ? trayCtx : boardCtx;
         selectedPiece.render(activeCtx, selectedPiece.currentX, selectedPiece.currentY, true);
@@ -1511,22 +1281,10 @@
     }
 
     /* -------------------------------------------------------------------------
-     * 7. 터치 & 마우스 인터랙션 (드래그 앤 드롭 & 자석 스냅)
+     * 6. 터치 & 마우스 인터랙션
      * ------------------------------------------------------------------------- */
-    function getPointerPos(e, canvas) {
-      const rect = canvas.getBoundingClientRect();
-      const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-      const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-      return {
-        x: clientX - rect.left,
-        y: clientY - rect.top,
-        screenX: clientX,
-        screenY: clientY
-      };
-    }
-
     function onPointerDown(e) {
-      initAudio(); // 첫 터치 시 오디오 활성화
+      initAudio();
       startTimerIfNotStarted();
 
       const trayRect = trayCanvas.getBoundingClientRect();
@@ -1536,13 +1294,11 @@
 
       let hitPiece = null;
 
-      // 1. 트레이 캔버스 내 클릭 감지
       if (
         clientX >= trayRect.left && clientX <= trayRect.right &&
         clientY >= trayRect.top && clientY <= trayRect.bottom
       ) {
         const pos = { x: clientX - trayRect.left, y: clientY - trayRect.top };
-        // 역순 검색 (위에 렌더링된 조각 먼저 선택)
         for (let i = pieces.length - 1; i >= 0; i--) {
           const p = pieces[i];
           if (!p.isLocked && p.containsPoint(pos.x, pos.y, p.currentX, p.currentY)) {
@@ -1553,9 +1309,7 @@
             break;
           }
         }
-      }
-      // 2. 보드 캔버스 내 클릭 감지 (아직 잠기지 않은 채 보드로 넘어온 조각)
-      else if (
+      } else if (
         clientX >= boardRect.left && clientX <= boardRect.right &&
         clientY >= boardRect.top && clientY <= boardRect.bottom
       ) {
@@ -1573,7 +1327,6 @@
 
       if (hitPiece) {
         selectedPiece = hitPiece;
-        // 선택된 조각을 배열 맨 뒤로 이동하여 최상위 렌더링
         pieces = pieces.filter(p => p !== selectedPiece);
         pieces.push(selectedPiece);
         redrawAll();
@@ -1590,7 +1343,6 @@
       const boardRect = boardCanvas.getBoundingClientRect();
       const trayRect = trayCanvas.getBoundingClientRect();
 
-      // 마우스가 보드 영역 위에 있는가?
       const isOverBoard = (
         clientX >= boardRect.left && clientX <= boardRect.right &&
         clientY >= boardRect.top && clientY <= boardRect.bottom
@@ -1609,20 +1361,17 @@
       redrawAll();
     }
 
-    function onPointerUp(e) {
+    function onPointerUp() {
       if (!selectedPiece) return;
 
       const piece = selectedPiece;
       selectedPiece = null;
 
-      // 보드 영역에 놓았는지 확인
       if (!piece.isInTray) {
-        // 올바른 목표 위치(targetX, targetY)와 거리 계산 (스냅 판정)
-        const snapThreshold = Math.max(piece.w, piece.h) * 0.45; // 45% 거리 이내 접근 시 자석 스냅
+        const snapThreshold = Math.max(piece.w, piece.h) * 0.45;
         const dist = Math.hypot(piece.currentX - piece.targetX, piece.currentY - piece.targetY);
 
         if (dist <= snapThreshold) {
-          // 찰칵! 올바른 자리에 고정(Lock)
           piece.currentX = piece.targetX;
           piece.currentY = piece.targetY;
           piece.isLocked = true;
@@ -1634,15 +1383,14 @@
       redrawAll();
     }
 
-    // 자석 스냅 효과음
     function playSnapSound() {
       if (!audioCtx) return;
       try {
         const osc = audioCtx.createOscillator();
         const gain = audioCtx.createGain();
         osc.type = 'triangle';
-        osc.frequency.setValueAtTime(587, audioCtx.currentTime); // D5
-        osc.frequency.setValueAtTime(880, audioCtx.currentTime + 0.05); // A5
+        osc.frequency.setValueAtTime(587, audioCtx.currentTime);
+        osc.frequency.setValueAtTime(880, audioCtx.currentTime + 0.05);
         gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
         gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.15);
         osc.connect(gain);
@@ -1652,7 +1400,6 @@
       } catch (e) {}
     }
 
-    // 이벤트 리스너 바인딩
     window.addEventListener('mousedown', onPointerDown);
     window.addEventListener('mousemove', onPointerMove);
     window.addEventListener('mouseup', onPointerUp);
@@ -1662,7 +1409,7 @@
     window.addEventListener('touchend', onPointerUp);
 
     /* -------------------------------------------------------------------------
-     * 8. 타이머, 진척도 및 완료 판정
+     * 7. 타이머 & 완료 모달
      * ------------------------------------------------------------------------- */
     function startTimerIfNotStarted() {
       if (!timerInterval && !isGameCompleted) {
@@ -1702,7 +1449,7 @@
     function playSuccessFanfare() {
       if (!audioCtx) return;
       try {
-        const notes = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6
+        const notes = [523.25, 659.25, 783.99, 1046.50];
         notes.forEach((freq, index) => {
           const osc = audioCtx.createOscillator();
           const gain = audioCtx.createGain();
@@ -1750,7 +1497,7 @@
     }
 
     /* -------------------------------------------------------------------------
-     * 9. 툴바 제어 함수 (난이도, 테마, 힌트, 리셋)
+     * 8. 툴바 제어 함수
      * ------------------------------------------------------------------------- */
     function setDifficulty(size, btnEl) {
       gridSize = size;
@@ -1769,10 +1516,9 @@
         const btn = document.getElementById(`themeBtn${i}`);
         if (btn) btn.classList.toggle('active', i === themeIdx);
       }
-      renderSvgToCanvas(currentTheme, () => {
-        createPuzzlePieces();
-        redrawAll();
-      });
+      drawDirectTheme(currentTheme);
+      createPuzzlePieces();
+      redrawAll();
     }
 
     function toggleHint() {
@@ -1785,13 +1531,13 @@
       elapsedSeconds = 0;
       isGameCompleted = false;
       document.getElementById('timerDisplay').innerText = '00:00';
+      drawDirectTheme(currentTheme);
       createPuzzlePieces();
       redrawAll();
     }
 
-    // 초기화 실행
     window.addEventListener('DOMContentLoaded', () => {
-      setTimeout(resizeCanvases, 100);
+      setTimeout(resizeCanvases, 50);
       window.addEventListener('resize', resizeCanvases);
     });
   </script>
